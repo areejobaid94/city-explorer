@@ -11,6 +11,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 app.get('/location', handleLocation);
+app.get('/weather', handleWeather);
 
 function handleLocation(req,res){
   let searchQuery = req.query.city;
@@ -32,6 +33,27 @@ function CityLocation (search_query,formatted_query,latitude,longitude){
   this.formatted_query = formatted_query;
   this.latitude = latitude;
   this.longitude = longitude;
+};
+
+function handleWeather(req,res){
+  let weatherObj = getWeatherData();
+  res.status(200).send(weatherObj);
+};
+
+function CityWeather (forecast,time){
+  this.forecast = forecast;
+  this.time = time;
+};
+
+function getWeatherData(){
+  let weatherArr = [];
+  let weatherData = require('./data/weather.json');
+  console.log(weatherData);
+  weatherData['data'].forEach(ele => {
+    weatherArr.push(new CityWeather(ele.weather.description, new Date(ele.datetime).toDateString()));
+  });
+
+  return weatherArr;
 };
 
 app.listen(port, () => {
