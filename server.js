@@ -15,6 +15,10 @@ app.get('/weather', handleWeather);
 
 function handleLocation(req,res){
   let searchQuery = req.query.city;
+  if (searchQuery == ''|| searchQuery == undefined) {
+    res.status(500).send(handleErrors(500, "Sorry, something went wrong"))
+    return;
+  };
   let locObj = getLocationData(searchQuery);
   res.status(200).send(locObj);
 };
@@ -55,6 +59,15 @@ function getWeatherData(){
 
   return weatherArr;
 };
+
+function handleErrors(status, responseText){
+  return new ErrorMes(status, responseText);
+}
+
+function ErrorMes(status,responseText){
+  this.status = status;
+  this.responseText = responseText;
+}
 
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
