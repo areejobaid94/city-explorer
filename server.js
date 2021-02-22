@@ -87,7 +87,7 @@ function getWeatherData(latitude,longitude){
     'lat':latitude,
     'lon':longitude
   }
-  return superagent.get('https://api.weatherbit.io/v2.0/current').query(query)
+  return superagent.get('https://api.weatherbit.io/v2.0/forecast/daily').query(query)
   .then(result =>{
     let weatherArr = result.body['data'].map(ele => {
       return new CityWeather(ele.weather.description, new Date(ele.datetime.split(':').splice(0,1)[0]).toDateString());
