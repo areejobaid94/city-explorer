@@ -75,3 +75,49 @@ Start time:  4:30
 Finish time:  5:10
 
 Actual time needed to complete: 40 minutes.
+
+
+////////2nd Day
+
+Number and name of feature: Data formatting
+
+Estimate of time needed to complete: .5 hour
+
+Start time: 2:40
+
+Finish time: 3:00
+
+Actual time needed to complete: 20 minutes.
+
+
+Number and name of feature: Locations
+
+Estimate of time needed to complete: .5 hour
+
+Start time: 3:00
+
+Finish time: 3:30
+
+Actual time needed to complete: 30 minutes.
+
+
+Number and name of feature: Weather
+
+Estimate of time needed to complete: .5 hour
+
+Start time: 3:30
+
+Finish time: 4:00
+
+Actual time needed to complete: 30 minutes.
+
+
+Number and name of feature: Parks
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 4:00
+
+Finish time: 5:30
+
+Actual time needed to complete: 90 minutes.
