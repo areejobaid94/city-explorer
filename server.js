@@ -57,15 +57,23 @@ function CityLocation (search_query,formatted_query,latitude,longitude){
 
 function handleWeather(req,res){
   console.log(req.query)
+  try{
   getWeatherData(req.query.latitude,req.query.longitude).then(data=>{
     res.status(200).send(data);
-  });
+  })} 
+  catch(e){
+    res.status(500).send(e);
+  }
 };
 
 function handleParks(req,res){
-  getParksData(req.query.latitude,req.query.longitude).then(data=>{
+  try{
+  getParksData(req.query.search_query).then(data=>{
     res.status(200).send(data);
-  });
+  })}
+  catch(e){
+    res.status(500).send(e);
+  }
 };
 
 function CityWeather (forecast,time){
@@ -89,10 +97,10 @@ function getWeatherData(latitude,longitude){
 
 };
 
-function getParksData(latitude,longitude){
+function getParksData(name){
   const query = {
     'api_key':process.env.PARKS_API_KEY,
-    'stateCode':[latitude,longitude],
+    'q':name
   }
   return superagent.get('https://developer.nps.gov/api/v1/parks').query(query)
   .then(result =>{
