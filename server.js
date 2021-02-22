@@ -14,6 +14,8 @@ app.get('/', (req, res) => {
 app.get('/location', handleLocation);
 app.get('/weather', handleWeather);
 app.get('/parks', handleParks);
+app.use('*', notFoundHandler);
+
 
 
 function handleLocation(req,res){
@@ -94,9 +96,8 @@ function getParksData(latitude,longitude){
   }
   return superagent.get('https://developer.nps.gov/api/v1/parks').query(query)
   .then(result =>{
-    console.log(result);
-    let parksArr = result.body[0]['data']["parks"].map(ele => {
-      return new Park(ele.name, new Date(ele.datetime.split(':').splice(0,1)[0]).toDateString());
+    let parksArr = result.body['data'].map(ele => {
+      return new Park(ele.fullName, Object.values(ele.addresses[0]).join(' '),ele.entranceFees.cost,ele.description,ele.url);
     });
     return parksArr;
   }).catch(error => console.log(error));
@@ -105,6 +106,10 @@ function getParksData(latitude,longitude){
 
 function handleErrors(status, responseText){
   return new ErrorMes(status, responseText);
+}
+
+function notFoundHandler(request, response) {
+  response.status(404).send('huh?');
 }
 
 function ErrorMes(status,responseText){
