@@ -57,15 +57,23 @@ function CityLocation (search_query,formatted_query,latitude,longitude){
 
 function handleWeather(req,res){
   console.log(req.query)
+  try{
   getWeatherData(req.query.latitude,req.query.longitude).then(data=>{
     res.status(200).send(data);
-  });
+  })} 
+  catch(e){
+    res.status(500).send(e);
+  }
 };
 
 function handleParks(req,res){
+  try{
   getParksData(req.query.search_query).then(data=>{
     res.status(200).send(data);
-  });
+  })}
+  catch(e){
+    res.status(500).send(e);
+  }
 };
 
 function CityWeather (forecast,time){
