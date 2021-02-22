@@ -63,7 +63,7 @@ function handleWeather(req,res){
 };
 
 function handleParks(req,res){
-  getParksData(req.query.latitude,req.query.longitude).then(data=>{
+  getParksData(req.query.search_query).then(data=>{
     res.status(200).send(data);
   });
 };
@@ -89,10 +89,10 @@ function getWeatherData(latitude,longitude){
 
 };
 
-function getParksData(latitude,longitude){
+function getParksData(name){
   const query = {
     'api_key':process.env.PARKS_API_KEY,
-    'stateCode':[latitude,longitude],
+    'q':name
   }
   return superagent.get('https://developer.nps.gov/api/v1/parks').query(query)
   .then(result =>{
