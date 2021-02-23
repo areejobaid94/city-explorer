@@ -18,8 +18,6 @@ app.get('/weather', handleWeather);
 app.get('/parks', handleParks);
 app.use('*', notFoundHandler);
 
-
-
 function handleLocation(req, res) {
   let searchQuery = req.query.city;
   try {
@@ -55,7 +53,6 @@ function getLocationData(searchQuery) {
         })
       }).catch(error => console.log(error));
   });
-
 };
 
 function CityLocation(search_query, formatted_query, latitude, longitude) {
