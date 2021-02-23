@@ -8,10 +8,8 @@ app.use(cors());
 require('dotenv').config();
 const port = process.env.PORT;
 const pg = require('pg');
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:PASSWORD@localhost:5432/areej',
-  ssl: process.env.DATABASE_URL ? true : false
-})
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
@@ -57,6 +55,7 @@ function getLocationData(searchQuery) {
         })
       }).catch(error => console.log(error));
   });
+
 };
 
 function CityLocation(search_query, formatted_query, latitude, longitude) {
