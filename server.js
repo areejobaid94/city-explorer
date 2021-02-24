@@ -8,7 +8,7 @@ app.use(cors());
 require('dotenv').config();
 const port = process.env.PORT;
 const pg = require('pg');
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL});
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -16,7 +16,72 @@ app.get('/', (req, res) => {
 app.get('/location', handleLocation);
 app.get('/weather', handleWeather);
 app.get('/parks', handleParks);
+app.get('/movies', handleMovies);
+app.get('/yelp', handleYelp);
 app.use('*', notFoundHandler);
+
+function handleMovies(req, res){
+  let searchQuery = req.query.search_query;
+  try {
+    getMovieData(searchQuery).then(result => {
+      res.status(200).send(result);
+    });
+  }
+  catch (e) {
+    res.status(500).send(e);
+  }
+}
+
+
+
+function getMovieData(searchQuery) {
+    const query = {
+      'api_key': process.env.MOVIE_API_KEY,
+      'query': searchQuery,
+    }
+    return superagent.get('https://api.themoviedb.org/3/search/movie').query(query)
+    .then(result => {
+      let mobiesArr = result.body['results'].map(ele => {
+        return new Movie(ele);
+      });
+      return mobiesArr;
+    }).catch(error => console.log(error));
+};
+
+
+function handleYelp(req, res){
+  try {
+    console.log(req.query)
+    getYelpData(req.query.search_query,req.query.page).then(data => {
+      res.status(200).send(data);
+    })
+  }
+  catch (e) {
+    res.status(500).send(e);
+  };
+}
+
+let offset = 1;
+
+function getYelpData(search_query,page) {
+  let key = process.env.YELP_API_KEY;
+  let limit = 5;
+  let newoffset = (offset - 1 )* limit + 1;
+  const query = {
+    'location': search_query,
+    'limit':limit,
+    'offset':newoffset
+  }
+  offset = offset + 1;
+  return superagent.get('https://api.yelp.com/v3/businesses/search').query(query).set({ "Authorization": `Bearer ${key}` })
+ .then(data => {
+       let YelpsArray = data.body.businesses.map(ele =>{
+         return new Yelp(ele);
+       })
+      return YelpsArray;
+ })
+ .catch(err => {console.log(err)})
+} 
 
 function handleLocation(req, res) {
   let searchQuery = req.query.city;
@@ -35,7 +100,6 @@ function handleLocation(req, res) {
 };
 
 function getLocationData(searchQuery) {
-  console.log('areej')
   return client.query(`SELECT * FROM locations WHERE '${searchQuery}' = search_query `).then(data => {
     if (data.rows.length) return {search_query:data.rows[0].search_query,formatted_query:data.rows[0].formatted_query,latitude:data.rows[0].latitude,longitude:data.rows[0].longitude};
     const query = {
@@ -46,7 +110,6 @@ function getLocationData(searchQuery) {
     }
     return superagent.get('https://us1.locationiq.com/v1/search.php').query(query)
       .then(result => {
-        console.log('areej1')
         let locObj = new CityLocation(searchQuery, result.body[0].display_name, result.body[0].lat, result.body[0].lon)
         return client.query(`INSERT INTO locations(search_query, formatted_query, latitude, longitude) VALUES ($1,$2,$3,$4)`,[searchQuery, result.body[0].display_name, result.body[0].lat, result.body[0].lon]).then(data => {
           return locObj;
@@ -63,7 +126,6 @@ function CityLocation(search_query, formatted_query, latitude, longitude) {
 };
 
 function handleWeather(req, res) {
-  console.log(req.query)
   try {
     getWeatherData(req.query.latitude, req.query.longitude).then(data => {
       res.status(200).send(data);
@@ -140,6 +202,24 @@ function Park(name, address, fee, description, url) {
   this.fee = fee;
   this.description = description;
   this.url = url;
+}
+
+function Yelp(yelpObj) {
+  this.name = yelpObj.name;
+  this.image_url = yelpObj.image_url;
+  this.price = yelpObj.price;
+  this.rating = yelpObj.rating;
+  this.url = yelpObj.url;
+};
+
+function Movie(movieObj){
+  this.title = movieObj.original_title;
+  this.overview = movieObj.overview;
+  this.average_votes = movieObj.vote_average;
+  this.total_votes = movieObj.vote_count;
+  this.image_url = `https://image.tmdb.org/t/p/w500${movieObj.poster_path}` || 'https://germistoncitynews.co.za/wp-content/uploads/sites/31/2016/04/Movies.jpg',
+  this.popularity = movieObj.popularity,
+  this.released_on = movieObj.release_date
 }
 
 client.connect().then(() => {
